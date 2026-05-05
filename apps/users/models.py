@@ -4,7 +4,7 @@ from django.db import models
 
 
 class User(AbstractUser):
-    pass
+    role = models.CharField(max_length=50, default='user')
 
 
 class Profile(models.Model):

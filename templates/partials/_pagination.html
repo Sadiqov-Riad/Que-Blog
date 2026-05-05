@@ -1,5 +1,59 @@
-<nav>
-  <a href="#">Prev</a>
-  <span>1</span>
-  <a href="#">Next</a>
+
+<nav aria-label="Page navigation" class="mt-5">
+  <ul class="pagination justify-content-center mb-0">
+    {% if posts.has_previous %}
+      <li class="page-item">
+        <a class="page-link shadow-sm border-0" href="?page={{ posts.previous_page_number }}" style="border-radius: 0.75rem 0 0 0.75rem; color: var(--accent-red); font-weight: 600;">
+          <i class="bi bi-chevron-left"></i> Prev
+        </a>
+      </li>
+    {% else %}
+      <li class="page-item disabled">
+        <span class="page-link shadow-sm border-0 text-muted" style="border-radius: 0.75rem 0 0 0.75rem;">
+          <i class="bi bi-chevron-left"></i> Prev
+        </span>
+      </li>
+    {% endif %}
+
+    {% for i in posts.paginator.page_range %}
+      {% if posts.number == i %}
+        <li class="page-item active" aria-current="page">
+          <span class="page-link shadow-sm border-0" style="background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%); color: white; font-weight: 700;">{{ i }}</span>
+        </li>
+      {% elif i > posts.number|add:'-3' and i < posts.number|add:'3' %}
+        <li class="page-item">
+          <a class="page-link shadow-sm border-0" href="?page={{ i }}" style="color: var(--text-main); font-weight: 500;">{{ i }}</a>
+        </li>
+      {% endif %}
+    {% endfor %}
+
+    {% if posts.has_next %}
+      <li class="page-item">
+        <a class="page-link shadow-sm border-0" href="?page={{ posts.next_page_number }}" style="border-radius: 0 0.75rem 0.75rem 0; color: var(--accent-red); font-weight: 600;">
+          Next <i class="bi bi-chevron-right"></i>
+        </a>
+      </li>
+    {% else %}
+      <li class="page-item disabled">
+        <span class="page-link shadow-sm border-0 text-muted" style="border-radius: 0 0.75rem 0.75rem 0;">
+          Next <i class="bi bi-chevron-right"></i>
+        </span>
+      </li>
+    {% endif %}
+  </ul>
 </nav>
+
+<style>
+  .pagination .page-link {
+    margin: 0 2px;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+  }
+  .pagination .page-link:hover:not(.disabled .page-link):not(.active .page-link) {
+    background-color: #fee2e2;
+    color: #991b1b !important;
+    transform: translateY(-2px);
+  }
+</style>

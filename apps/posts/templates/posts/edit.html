@@ -1,6 +1,142 @@
 {% extends "base.html" %}
 {% block title %}Edit Post{% endblock %}
 {% block content %}
-<h1>Edit Post</h1>
-<p>Edit form goes here.</p>
+<div class="row justify-content-center">
+  <div class="col-lg-10">
+    <div class="glass-panel p-4 p-md-5">
+      <h1 class="fw-bold mb-4">✏️ Edit Post</h1>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        
+        <div class="mb-3">
+          <label class="form-label fw-semibold">{{ form.title.label }}</label>
+          {{ form.title }}
+          {{ form.title.errors }}
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label fw-semibold">{{ form.category.label }}</label>
+          {{ form.category }}
+          {{ form.category.errors }}
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label fw-semibold">{{ form.cover_image.label }}</label>
+          {{ form.cover_image }}
+          {{ form.cover_image.errors }}
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label fw-semibold">{{ form.content.label }}</label>
+          <div id="editorjs" class="border rounded-3 p-3 bg-white text-dark" style="min-height: 250px;"></div>
+          <div style="display: none;">{{ form.content }}</div>
+          {{ form.content.errors }}
+        </div>
+        
+        <div class="mb-4">
+          <label class="form-label fw-semibold">{{ form.tags.label }}</label>
+          {{ form.tags }}
+          {{ form.tags.errors }}
+        </div>
+        
+        <div class="d-flex justify-content-between align-items-center mt-5 pt-3 border-top">
+          <a href="{% url 'posts:detail' post.id %}" class="btn btn-outline-secondary">Cancel</a>
+          <button type="submit" class="btn btn-primary px-4 fw-bold">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- Choices.js CSS & JS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/header@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@editorjs/list@latest"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const contentInput = document.getElementById('id_content');
+    
+    let initialData = undefined;
+    if (contentInput.value && contentInput.value.trim() !== '') {
+      try {
+        initialData = JSON.parse(contentInput.value);
+      } catch (e) {
+        initialData = undefined;
+      }
+    }
+
+    let editorTools = {};
+    if (typeof Header !== 'undefined') {
+      editorTools.header = { class: Header };
+    }
+    if (typeof List !== 'undefined') {
+      editorTools.list = { class: List, inlineToolbar: true };
+    } else if (typeof EditorjsList !== 'undefined') {
+      editorTools.list = { class: EditorjsList, inlineToolbar: true };
+    }
+
+    try {
+      const editor = new EditorJS({
+        holder: 'editorjs',
+        placeholder: 'Type your awesome story here...',
+        data: initialData,
+        tools: editorTools,
+        onChange: function() {
+          editor.save().then((outputData) => {
+            contentInput.value = JSON.stringify(outputData);
+          });
+        }
+      });
+
+      const form = contentInput.closest('form');
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        editor.save().then((outputData) => {
+          contentInput.value = JSON.stringify(outputData);
+          form.submit();
+        });
+      });
+    } catch (err) {
+      console.error("EditorJS initialization failed:", err);
+      contentInput.style.display = 'block';
+      document.getElementById('editorjs').style.display = 'none';
+    }
+
+    // Initialize Choices.js for Category and Tags
+    const categorySelect = document.getElementById('id_category');
+    if (categorySelect) {
+      new Choices(categorySelect, {
+        searchEnabled: false,
+        itemSelectText: '',
+      });
+    }
+
+    const tagsSelect = document.getElementById('id_tags');
+    if (tagsSelect) {
+      // Convert to input text to allow free text entry for Tags
+      const tagsInput = document.createElement('input');
+      tagsInput.type = 'text';
+      tagsInput.id = 'id_tags';
+      tagsInput.name = 'tags';
+      tagsInput.className = tagsSelect.className;
+      
+      const selectedOptions = Array.from(tagsSelect.options).filter(o => o.selected).map(o => o.text);
+      tagsInput.value = selectedOptions.join(',');
+      tagsSelect.parentNode.replaceChild(tagsInput, tagsSelect);
+
+      new Choices(tagsInput, {
+        removeItemButton: true,
+        editItems: true,
+        delimiter: ',',
+        placeholderValue: 'Type and press enter to create tags...',
+      });
+    }
+  });
+</script>
 {% endblock %}

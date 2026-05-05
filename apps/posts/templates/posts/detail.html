@@ -1,7 +1,76 @@
 {% extends "base.html" %}
-{% block title %}Post{% endblock %}
+{% block title %}{{ post.title }} - Que Blog{% endblock %}
 {% block content %}
-<h1>Post detail</h1>
-{% include "partials/_tags.html" %}
-{% include "partials/_comment.html" %}
+<article class="glass-panel p-4 p-md-5 post-detail">
+  <div class="mb-4">
+    <a href="/" class="text-decoration-none text-muted mb-3 d-inline-block"><i class="bi bi-arrow-left"></i> Back to feed</a>
+    
+    <h1 class="fw-bolder mb-3 display-5">{{ post.title }}</h1>
+    
+    <div class="d-flex align-items-center mb-4 pb-3 border-bottom text-muted">
+      <i class="bi bi-person-circle fs-4 me-2"></i>
+      <div class="lh-sm">
+        <div class="fw-bold text-dark">{{ post.author.username }}</div>
+        <small>{{ post.published_at|date:"F d, Y - H:i" }}</small>
+      </div>
+      {% if post.category %}
+        <span class="badge badge-custom ms-auto px-3 py-2 rounded-pill">{{ post.category.name }}</span>
+      {% endif %}
+      
+      {% if user == post.author or user.role == 'admin' or user.role == 'superadmin' %}
+        <div class="d-flex gap-2 {% if not post.category %}ms-auto{% else %}ms-3{% endif %}">
+          <a href="{% url 'posts:edit' post.id %}" class="btn btn-sm btn-outline-secondary rounded-pill fw-semibold px-3 shadow-sm">
+            <i class="bi bi-pencil-fill me-1"></i> Edit
+          </a>
+          <a href="{% url 'posts:delete' post.id %}" class="btn btn-sm btn-outline-danger rounded-pill fw-semibold px-3 shadow-sm">
+            <i class="bi bi-trash-fill me-1"></i> Delete
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if post.cover_image %}
+    <div class="mb-5 mt-3 text-center">
+      <img src="{{ post.cover_image.url }}" class="img-fluid rounded-3 shadow-sm" alt="{{ post.title }} cover" />
+    </div>
+  {% endif %}
+
+  <div class="article-content fs-5 lh-lg text-dark mb-5" id="post-content-display"></div>
+  <span style="display: none;" id="raw-content">{{ post.content }}</span>
+  
+  {% include "partials/_tags.html" with post=post %}
+
+  <div class="d-flex align-items-center justify-content-between p-3 mt-4 bg-light rounded-4">
+    <span class="text-muted fw-semibold">Did you find this useful?</span>
+    {% include "partials/_reactions.html" with post=post %}
+  </div>
 {% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/editorjs-html@3.4.0/build/edjsHTML.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const rawContentEl = document.getElementById('raw-content');
+    const displayEl = document.getElementById('post-content-display');
+    const rawText = rawContentEl.textContent || rawContentEl.innerText;
+    
+    let isJson = false;
+    let data = null;
+    try {
+      data = JSON.parse(rawText);
+      if (data && data.blocks) isJson = true;
+    } catch(e) {}
+    
+    if (isJson) {
+      const edjsParser = edjsHTML();
+      const html = edjsParser.parse(data);
+      displayEl.innerHTML = html.join('');
+    } else {
+      // Fallback for older raw text posts
+      displayEl.innerHTML = rawText.replace(/\n/g, '<br>');
+    }
+  });
+</script>
+{% endblock %}
+

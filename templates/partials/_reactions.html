@@ -1,0 +1,75 @@
+<div class="d-flex align-items-center gap-3">
+  <!-- Views Count -->
+  <div class="text-muted d-flex align-items-center" title="Views">
+    <i class="bi bi-eye me-1"></i> 
+    <span class="fw-semibold">{{ post.views_count|default:0 }}</span>
+  </div>
+
+  <!-- Average Rating -->
+  <div class="text-muted d-flex align-items-center" title="Average Rating">
+    <i class="bi bi-star-fill text-warning me-1"></i>
+    <span class="fw-bold {% if post.avg_rating and post.avg_rating >= 4 %}text-success{% endif %}">
+      {% if post.avg_rating %}{{ post.avg_rating|floatformat:1 }}{% else %}0.0{% endif %}
+    </span>
+    <small class="ms-1">({{ post.rating_count|default:0 }})</small>
+  </div>
+
+  <!-- Rating Submission (Dropdown or Expandable) -->
+  {% if user.is_authenticated %}
+  <div class="dropdown">
+    <button class="btn btn-sm btn-light rounded-pill border-0 text-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Rate this article">
+      Rate
+    </button>
+    <div class="dropdown-menu p-2 border-0 shadow" style="min-width: 150px; border-radius: 1rem;">
+      <form method="post" action="{% url 'reactions:set_rating' %}" class="d-flex justify-content-center m-0 p-1 rating-stars">
+        {% csrf_token %}
+        <input type="hidden" name="post_id" value="{{ post.id }}" />
+        <input type="hidden" name="next" value="{{ request.get_full_path }}" />
+        
+        <!-- Star 1 -->
+        <button type="submit" name="score" value="1" class="btn btn-link p-1 text-warning text-decoration-none shadow-none star-btn"><i class="bi bi-star"></i></button>
+        <!-- Star 2 -->
+        <button type="submit" name="score" value="2" class="btn btn-link p-1 text-warning text-decoration-none shadow-none star-btn"><i class="bi bi-star"></i></button>
+        <!-- Star 3 -->
+        <button type="submit" name="score" value="3" class="btn btn-link p-1 text-warning text-decoration-none shadow-none star-btn"><i class="bi bi-star"></i></button>
+        <!-- Star 4 -->
+        <button type="submit" name="score" value="4" class="btn btn-link p-1 text-warning text-decoration-none shadow-none star-btn"><i class="bi bi-star"></i></button>
+        <!-- Star 5 -->
+        <button type="submit" name="score" value="5" class="btn btn-link p-1 text-warning text-decoration-none shadow-none star-btn"><i class="bi bi-star"></i></button>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Bookmark Toggle -->
+  {% if user.is_authenticated %}
+  <form method="post" action="{% url 'reactions:bookmark_toggle' %}" class="m-0 p-0">
+    {% csrf_token %}
+    <input type="hidden" name="post_id" value="{{ post.id }}" />
+    <input type="hidden" name="next" value="{{ request.get_full_path }}" />
+    <button type="submit" class="btn btn-sm rounded-pill border-0 {% if post.is_bookmarked %}btn-primary{% else %}btn-light text-secondary{% endif %}" title="Bookmark">
+      <i class="bi {% if post.is_bookmarked %}bi-bookmark-fill{% else %}bi-bookmark{% endif %}"></i>
+    </button>
+  </form>
+  {% endif %}
+</div>
+
+<script>
+  // Simple script to handle hover effects for stars
+  document.querySelectorAll('.rating-stars').forEach(form => {
+    const stars = form.querySelectorAll('.star-btn i');
+    stars.forEach((star, index) => {
+      star.parentElement.addEventListener('mouseover', () => {
+        for(let i=0; i<=index; i++) {
+          stars[i].classList.replace('bi-star', 'bi-star-fill');
+        }
+        for(let i=index+1; i<stars.length; i++) {
+          stars[i].classList.replace('bi-star-fill', 'bi-star');
+        }
+      });
+      star.parentElement.addEventListener('mouseout', () => {
+        stars.forEach(s => s.classList.replace('bi-star-fill', 'bi-star'));
+      });
+    });
+  });
+</script>

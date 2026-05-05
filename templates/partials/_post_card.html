@@ -1,5 +1,39 @@
-<article>
-  <h2>Post title</h2>
-  <p>Post excerpt...</p>
-  <a href="#">Read more</a>
+<article class="card post-card mb-4 shadow-sm animate-fade-in overflow-hidden border-0 glass-panel">
+  <div class="card-header bg-transparent border-0 pt-4 pb-0 px-4 d-flex align-items-center mb-2 fs-6 text-muted">
+    <div class="d-flex align-items-center">
+      <i class="bi bi-person-circle me-2 fs-5"></i>
+      <span class="fw-bold text-dark me-3">{{ post.author.username }}</span>
+      <span class="text-muted" style="font-size: 0.9rem;">{{ post.published_at|date:"M d, Y - H:i" }}</span>
+    </div>
+  </div>
+
+  <div class="card-body px-4 pt-2 pb-0">
+    <h3 class="card-title fw-bold mb-3">
+      <a href="{% url 'posts:detail' post.id %}" class="text-decoration-none text-dark">{{ post.title }}</a>
+    </h3>
+  </div>
+
+  {% if post.cover_image %}
+    <div class="px-4 mb-3">
+      <img src="{{ post.cover_image.url }}" class="img-fluid rounded-4 w-100 object-fit-cover shadow-sm" alt="{{ post.title }} cover" style="height: 280px; width: 100%;">
+    </div>
+  {% else %}
+    <!-- Optional: show a small placeholder or nothing if no image is present. For a blog, usually nothing is better if no image. -->
+  {% endif %}
+
+  <div class="card-body px-4 pt-0">
+    <p class="card-text text-secondary mb-4 fs-5" style="line-height: 1.6;">{{ post.get_excerpt }}</p>
+    
+    <div class="d-flex justify-content-between align-items-center border-top pt-3 mt-2 flex-wrap gap-2">
+      <div class="d-flex align-items-center gap-2">
+        {% if post.category %}
+          <span class="badge badge-custom px-3 py-2 rounded-pill">{{ post.category.name }}</span>
+        {% endif %}
+      </div>
+      
+      <div>
+        {% include "partials/_reactions.html" with post=post %}
+      </div>
+    </div>
+  </div>
 </article>

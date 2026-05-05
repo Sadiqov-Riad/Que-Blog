@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}404 - Page Not Found{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-center min-vh-50 mt-5">
+  <div class="text-center glass-panel p-5 animate-fade-in" style="max-width: 600px; width: 100%;">
+    <div class="mb-4">
+      <i class="bi bi-compass text-danger" style="font-size: 6rem; opacity: 0.8;"></i>
+    </div>
+    <h1 class="display-1 fw-bold mb-3" style="color: var(--accent-red); text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">404</h1>
+    <h2 class="h3 fw-semibold mb-3">Oops! You're lost in cyberspace.</h2>
+    <p class="text-secondary mb-5 fs-5">
+      The page you are looking for might have been removed, had its name changed, or is temporarily unavailable. 
+      Let's get you back home!
+    </p>
+    <a href="/" class="btn btn-primary btn-lg px-5 rounded-pill shadow">
+      <i class="bi bi-house-door-fill me-2"></i> Return to Feed
+    </a>
+  </div>
+</div>
+
+<style>
+  .min-vh-50 {
+    min-height: 50vh;
+  }
+</style>
+{% endblock %}

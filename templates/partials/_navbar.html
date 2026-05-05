@@ -1,5 +1,143 @@
-<nav>
-  <a href="/">Home</a>
-  <a href="/categories/">Categories</a>
-  <a href="/users/login/">Login</a>
+<nav class="navbar navbar-expand-lg navbar-light navbar-glass sticky-top shadow-sm py-3">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="/" style="font-size: 1.5rem; letter-spacing: -0.5px;">
+      ¿Qué?
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-lg-center">
+        <li class="nav-item">
+          <a class="nav-link fw-semibold text-dark" href="/">Flow</a>
+        </li>
+        <li class="nav-item ms-lg-2">
+          <a class="nav-link fw-semibold" href="/categories/">Categories</a>
+        </li>
+      </ul>
+      
+      <form class="d-flex mx-auto me-lg-4 mb-2 mb-lg-0" style="max-width: 400px; width: 100%;" action="/" method="GET">
+        <div class="input-group input-group-sm">
+          <span class="input-group-text bg-light border-end-0 border rounded-start-pill ps-3" id="search-addon">
+            <i class="bi bi-search text-muted"></i>
+          </span>
+          <input class="form-control bg-light border-start-0 border rounded-end-pill py-2 shadow-none" type="search" placeholder="Search articles..." aria-label="Search" name="q" value="{{ request.GET.q }}">
+        </div>
+      </form>
+      <ul class="navbar-nav align-items-center">
+        {% if user.is_authenticated %}
+          <li class="nav-item me-3">
+            <a class="btn btn-primary btn-sm fw-bold rounded-pill px-3 shadow-sm" href="{% url 'posts:create' %}">
+              <i class="bi bi-pencil-square me-1"></i> Write
+            </a>
+          </li>
+          
+          <li class="nav-item dropdown">
+            <a class="nav-link p-0 dropdown-toggle-hide-arrow" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <div class="position-relative">
+                {% if user.profile.avatar %}
+                  <img src="{{ user.profile.avatar.url }}" alt="Avatar" class="rounded-circle border shadow-sm" style="width: 42px; height: 42px; object-fit: cover;">
+                {% else %}
+                  <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=b91c1c&color=fff" alt="Avatar" class="rounded-circle border shadow-sm" width="42" height="42">
+                {% endif %}
+              </div>
+            </a>
+            
+            <div class="dropdown-menu dropdown-menu-end profile-dropdown-menu mt-3" aria-labelledby="profileDropdown">
+              <div class="profile-header">
+                <div class="d-flex align-items-center gap-3">
+                  {% if user.profile.avatar %}
+                    <img src="{{ user.profile.avatar.url }}" alt="Avatar" class="profile-avatar shadow-sm" style="object-fit: cover;">
+                  {% else %}
+                    <img src="https://ui-avatars.com/api/?name={{ user.username }}&background=b91c1c&color=fff" alt="Avatar" class="profile-avatar shadow-sm">
+                  {% endif %}
+                  <div class="lh-sm">
+                    <h6 class="mb-0 fw-bolder fs-5 text-dark">{{ user.username }}</h6>
+                    <small class="text-muted fw-semibold" style="font-size: 0.85rem;">{{ user.role|default:"User" }}</small>
+                  </div>
+                </div>
+              </div>
+              
+              <hr class="dropdown-divider">
+              
+              <a class="dropdown-item dropdown-item-custom py-2 mt-1" href="{% url 'users:profile' %}">
+                <i class="bi bi-person-fill" style="color: #c0c5ce;"></i> Profile & Settings
+              </a>
+              {% if user.role == 'admin' or user.role == 'superadmin' %}
+              <a class="dropdown-item dropdown-item-custom py-2" href="{% url 'posts:pending' %}">
+                <i class="bi bi-hourglass-split" style="color: #c0c5ce;"></i> Pending Articles
+              </a>
+              <a class="dropdown-item dropdown-item-custom py-2" href="{% url 'users:user_list' %}">
+                <i class="bi bi-people-fill" style="color: #c0c5ce;"></i> User Management
+              </a>
+              {% endif %}
+              
+              <hr class="dropdown-divider">
+              
+              <a class="dropdown-item dropdown-item-custom py-2 mb-2 text-danger" href="{% url 'users:logout' %}">
+                <i class="bi bi-box-arrow-right text-danger"></i> Logout
+              </a>
+            </div>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a class="nav-link fw-semibold" href="/users/login/">Sign In</a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-outline-dark btn-sm rounded-pill px-3 mt-1 ms-2 fw-semibold" href="/users/register/">Sign Up</a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
 </nav>
+
+<style>
+  .dropdown-toggle-hide-arrow::after {
+    display: none !important;
+  }
+  .profile-dropdown-menu {
+    width: 320px;
+    border-radius: 1.25rem;
+    border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: 0 20px 40px -10px rgba(0,0,0,0.15);
+    padding: 0;
+    overflow: hidden;
+    animation: fadeInDropdown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes fadeInDropdown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .profile-header {
+    padding: 24px;
+    background: #ffffff;
+  }
+  .profile-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .dropdown-item-custom {
+    padding: 10px 24px;
+    font-weight: 500;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .dropdown-item-custom:hover {
+    background: #f8fafc;
+    color: #0f172a;
+  }
+  .dropdown-item-custom i {
+    font-size: 1.25rem;
+  }
+  .dropdown-divider {
+    margin: 0;
+    border-top: 1px solid #f1f5f9;
+  }
+</style>
